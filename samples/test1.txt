@@ -1,0 +1,8 @@
+a = conf 0.99
+b = conf 1.0
+c = conf 1.0
+d = conf 1.0
+
+a <- b c d
+b <- c d
+c <- d
