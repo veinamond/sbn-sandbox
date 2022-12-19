@@ -1,13 +1,13 @@
 from sbn_generator import *
-from sbn.sbn_io import *
-from sbn.sbn_problems import solve_problem_1
+from sbn_io import *
+from sbn_problems import solve_problem_1
 
 if __name__ == '__main__':
 
     n = 15
     m = 50
     sbn = build_conformist_sbn(random_graph__erdos_renyi_m(n, m), 0.8)
-    write_sbn(sbn, "samples/test_rnd.txt")
+    write_sbn(sbn, "samples/sbn_test_rnd.txt")
 
     for instigators in range(1, n):
         solution = solve_problem_1(sbn, instigators, n - instigators)
