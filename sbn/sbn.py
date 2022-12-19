@@ -1,4 +1,7 @@
 class AgentType:
+    """
+        Type of agent. It could be either conformist or anticoformist
+    """
 
     conformist = 0
     anticonformist = 1
@@ -13,6 +16,9 @@ agent_type_str_to_id = {v: k for k, v in agent_type_id_to_str.items()}
 
 
 class Agent:
+    """
+        Agent data structure.
+    """
 
     def __init__(self, agent_type, theta):
         if theta < 0 or theta > 1:
@@ -27,6 +33,12 @@ class Agent:
 
 
 class SBN:
+    """
+        Synchronised boolean network structure.
+        It's defined as a set of agents (agents are associated with their IDs using ``self.agents``)
+        and a agent dependency directed graph ``self.graph``
+        Agents IDs class must be hashable.
+    """
 
     def __init__(self):
         self.agents = {}
@@ -44,11 +56,6 @@ class SBN:
             self.put_agent(a_id, a)
 
     def add_edge(self, from_id, to_id):
-        # if not (from_id in self.agents):
-        #     raise ValueError("Unknown agent: {}".format(from_id))
-        # if not (to_id in self.agents):
-        #     raise ValueError("Unknown agent: {}".format(to_id))
-
         if not (from_id in self.graph):
             self.graph[from_id] = []
         self.graph[from_id].append(to_id)
@@ -62,46 +69,7 @@ class SBN:
             self.add_edge(from_id, to_id)
 
     def is_conforming(self):
+        """
+            Returns whether SBN is conforming (== every agent of this SBN is conforming)
+        """
         return all(agent.agent_type == AgentType.conformist for agent in self.agents.values())
-
-
-def read_sbn(path):
-    with open(path) as f:
-        sbn = SBN()
-
-        for line in f.readlines():
-            sep_pos = line.rfind("#")
-            line_content = line if sep_pos == -1 else line[:sep_pos]
-            line_args = line_content.split()
-
-            if len(line_args) == 0:
-                continue
-            if len(line_args) == 1:
-                raise ValueError("Too few arguments, expected either agent declaration or edge(s), got {}".format(line_content))
-            else:
-                if line_args[1] == '=':
-                    if len(line_args) < 4:
-                        raise ValueError("Too few arguments at agent declaration. Expected '<agent_id> = <conf|anticonf> <theta>', got {}".format(line_content))
-                    sbn.put_agent(line_args[0], Agent(agent_type_str_to_id[line_args[2]], float(line_args[3])))
-                else:
-                    if line_args[1] == '<-':
-                        [sbn.add_edge(line_args[0], to) for to in line_args[2:]]
-                    else:
-                        raise ValueError("Expected either agent declaration ('a = ...') or edge(s) ('a <- ...'), got {}".format(line_content))
-
-        return sbn
-
-
-def write_sbn(sbn, path):
-    file = open(path, "w")
-
-    for agent_id in sbn.agents.keys():
-        agent = sbn.agents[agent_id]
-        file.write("{} = {} {}\n".format(agent_id, agent_type_id_to_str[agent.agent_type], agent.theta))
-    file.write("\n")
-
-    for v in sbn.graph.keys():
-        file.write("{} <-".format(v))
-        for u in sbn.graph[v]:
-            file.write(" {}".format(u))
-        file.write("\n")
