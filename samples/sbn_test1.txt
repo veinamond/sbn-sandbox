@@ -6,3 +6,4 @@ d = conf 1.0
 a <- b c d
 b <- c d
 c <- d
+d <- a b c

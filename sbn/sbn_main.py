@@ -88,11 +88,8 @@ def build_cnf_for_problem_1(sbn, instigators, need_to_activate):
 def extract_solution_of_problem_1(sbn, cnf_solution):
     idx_to_agent_id = list(sbn.agents.keys())
 
-    print(cnf_solution)
     sliced_vars = cnf_solution[:len(sbn.agents)]
-    print(sliced_vars)
     true_vars = list(filter(lambda cnf_var: cnf_var > 0, sliced_vars))
-    print(true_vars)
     return [idx_to_agent_id[i - 1] for i in true_vars]
 
 
@@ -101,7 +98,7 @@ if __name__ == '__main__':
     n = 15
     m = 50
     r_sbn = build_conformist_sbn(random_graph__erdos_renyi_m(n, m), 0.8)
-    write_sbn(r_sbn, "samples/test_rnd.txt")
+    write_sbn(r_sbn, "../samples/sbn_test_rnd.txt")
 
     for instigators in range(1, n):
         cnf = build_cnf_for_problem_1(r_sbn, instigators, n - instigators)
