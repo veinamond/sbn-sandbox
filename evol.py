@@ -11,7 +11,7 @@ def using_1p1(init_vec, fit_function, iterations, seed=None):
     for _ in range(iterations):
         new_vec = [1 - cur_vec[i] if random.randrange(n) == 0 else cur_vec[i] for i in range(n)]
         new_fit = fit_function(new_vec)
-        if new_fit < cur_fit:
+        if new_fit <= cur_fit:
             cur_vec = new_vec
             cur_fit = new_fit
 

@@ -16,6 +16,7 @@ class DLTM:
 
     def put_agent(self, agent_id, theta):
         self.agents[agent_id] = theta
+        self.graph[agent_id] = []
         self.ord_to_agent.append(agent_id)
         self.agent_to_ord[agent_id] = len(self.ord_to_agent) - 1
 
@@ -24,8 +25,8 @@ class DLTM:
             self.put_agent(agent_id, theta)
 
     def add_edge(self, agent_id_from, agent_id_to, influence):
-        if not (agent_id_from in self.graph):
-            self.graph[agent_id_from] = []
+        if not (agent_id_from in self.agents):
+            self.put_agent(agent_id_from, 0)
         self.graph[agent_id_from].append(agent_id_to)
         self.infl[(agent_id_from, agent_id_to)] = influence
 
