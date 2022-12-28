@@ -42,23 +42,27 @@ class DLTM:
         graph = gnp_random_graph(n, p, seed=seed, directed=True)
         [self.put_agent(i, 0) for i in range(n)]
         [self.add_edge(a_from, a_to, 0) for a_from, a_to in graph.edges]
+        return self
 
     def generate_gnm_random_graph(self, n, m, seed=None):
         graph = gnm_random_graph(n, m, seed=seed, directed=True)
         [self.put_agent(i, 0) for i in range(n)]
         [self.add_edge(a_from, a_to, 0) for a_from, a_to in graph.edges]
+        return self
 
     def generate_watts_strogatz_graph(self, n, k, p, seed=None):
         graph = watts_strogatz_graph(n, k, p, seed=seed)
         [self.put_agent(i, 0) for i in range(n)]
         [self.add_edge(a_from, a_to, 0) for a_from, a_to in graph.edges]
         [self.add_edge(a_to, a_from, 0) for a_from, a_to in graph.edges]
+        return self
 
     def generate_barabasi_albert_graph(self, n, m, seed=None):
         graph = barabasi_albert_graph(n, m, seed=seed, initial_graph=None)
         [self.put_agent(i, 0) for i in range(n)]
         [self.add_edge(a_from, a_to, 0) for a_from, a_to in graph.edges]
         [self.add_edge(a_to, a_from, 0) for a_from, a_to in graph.edges]
+        return self
 
     # 2. Influence generation
 
@@ -67,12 +71,13 @@ class DLTM:
         for a_from, a_to in self.infl:
             i = generator(random)
             self.infl[(a_from, a_to)] = i
+        return self
 
     def generate_constant_influences(self, c):
-        self.generate_influences(lambda r: c, None)
+        return self.generate_influences(lambda r: c, None)
 
     def generate_range_influences(self, i_from, i_to, seed=None):
-        self.generate_influences(lambda r: r.randrange(i_from, i_to + 1), seed)
+        return self.generate_influences(lambda r: r.randrange(i_from, i_to + 1), seed)
 
     # 3. Agents threshold generation
 
@@ -86,6 +91,7 @@ class DLTM:
             self.agents[a_to] += infl
         for a, thr in self.agents.items():
             self.agents[a] = math.ceil(thr * theta)
+        return self
 
 
 def read_dltm(path):

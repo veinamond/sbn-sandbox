@@ -20,16 +20,22 @@ if __name__ == '__main__':
 
     iterations = 10
 
-    sum_time = 0
-    for _ in range(iterations):
-        t = timeof(lambda: print(tss_problem.solve_using_1p1_naive(10000)))
-        sum_time += t
-        print('Time (1+1, naive fit): {}'.format(t))
-    print('Average: {}\n'.format(sum_time / iterations))
+    print(tss_problem.solve_using_1p1(10000))
+    print(tss_problem.solve_using_1cl(10, 1000))
+    print(tss_problem.solve_using_1cl(100, 100))
+    print(tss_problem.solve_using_1cl(1000, 10))
+    print(tss_problem.solve_using_custom_ga(2, 4, 4, 1000))
 
-    sum_time = 0
-    for _ in range(iterations):
-        t = timeof(lambda: print(tss_problem.solve_using_1p1(10000)))
-        sum_time += t
-        print('Time (1+1, optimal fit): {}'.format(t))
-    print('Average: {}\n'.format(sum_time / iterations))
+    # sum_time = 0
+    # for _ in range(iterations):
+    #     t = timeof(lambda: print(tss_problem.solve_using_1p1(10000)))
+    #     sum_time += t
+    #     print('Time (1+1): {}'.format(t))
+    # print('Average: {}\n'.format(sum_time / iterations))
+    #
+    # sum_time = 0
+    # for _ in range(iterations):
+    #     t = timeof(lambda: print(tss_problem.solve_using_1cl(100, 100)))
+    #     sum_time += t
+    #     print('Time (1,lambda): {}'.format(t))
+    # print('Average: {}\n'.format(sum_time / iterations))
