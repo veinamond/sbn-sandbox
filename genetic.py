@@ -2,27 +2,40 @@ import functools
 import random
 
 
-def using_1p1(init_vec, fit_function, mutation, iterations):
+def using_1p1(init_vec, fit_function, mutation, stop_criteria):
     cur_vec = init_vec
     cur_fit = fit_function(cur_vec)
-    n = len(init_vec)
-    for _ in range(iterations):
+    iterations = 0
+    stagnations = 0
+    while not ((stop_criteria.is_iteration_count() and iterations >= stop_criteria.get_iteration_count())
+               or (stop_criteria.is_stagnation_count() and stagnations >= stop_criteria.get_stagnation_count())):
         new_vec = mutation(cur_vec)
         new_fit = fit_function(new_vec)
+
+        iterations += 1
+        if new_fit < cur_fit:
+            stagnations = 0
+        else:
+            stagnations += 1
+
         if new_fit <= cur_fit:
             cur_vec = new_vec
             cur_fit = new_fit
 
-    return cur_vec
+    return cur_vec, {'iterations': iterations}
 
 
-def using_1cl(init_vec, fit_function, mutation, lmbd, iterations):
+def using_1cl(init_vec, fit_function, mutation, lmbd, stop_criteria):
     if lmbd < 1:
         raise ValueError('Lambda parameter in (1,lambda) algorithm must be >= 1')
 
     cur_vec = init_vec
-    n = len(init_vec)
-    for _ in range(iterations):
+    cur_fit = fit_function(cur_vec)
+    best_fit = None
+    iterations = 0
+    stagnations = 0
+    while not ((stop_criteria.is_iteration_count() and iterations >= stop_criteria.get_iteration_count())
+               or (stop_criteria.is_stagnation_count() and stagnations >= stop_criteria.get_stagnation_count())):
         new_opt_vec = None
         new_opt_fit = None
         for _ in range(lmbd):
@@ -31,42 +44,65 @@ def using_1cl(init_vec, fit_function, mutation, lmbd, iterations):
             if not new_opt_fit or new_fit < new_opt_fit:
                 new_opt_vec = new_vec
                 new_opt_fit = new_fit
+
+        iterations += 1
+        if best_fit is None or new_opt_fit < best_fit:
+            best_fit = new_opt_fit
+            stagnations = 0
+        else:
+            stagnations += 1
+
         cur_vec = new_opt_vec
+        cur_fit = new_opt_fit
 
-    return cur_vec
+    return cur_vec, {'iterations': iterations}
 
 
-def using_custom_ga(init_vec, fit_function, mutation, crossover, l, h, g, iterations):
+def using_custom_ga(init_vec, fit_function, mutation, crossover, l, h, g, stop_criteria):
     if l < 0 or h < 0 or g < 0 or l + h + g < 1:
         raise ValueError('l, h and g parameters must be non-negative integers; also l + h + g must be >= 1')
     if g % 2 == 1:
         raise ValueError('g must be even number')
 
-    def cmp_by_2nd(i1, i2):
-        return 0 if i1[1] == i2[1] else (1 if i1[1] < i2[1] else -1)
+    def cmp_by_2nd_dec(idx1, idx2):
+        return 0 if idx1[1] == idx2[1] else (1 if idx1[1] < idx2[1] else -1)
 
     sz = l + h + g      # population size
-    population = [init_vec] * sz
-    for _ in range(iterations):
-        new_population = []
-        u = [(i, 1 / fit_function(population[i])) for i in range(sz)]
+    population_with_fit = [with_fit(item, fit_function) for item in [init_vec] * sz]
+    iterations = 0
+    stagnations = 0
+    while not ((stop_criteria.is_iteration_count() and iterations >= stop_criteria.get_iteration_count())
+               or (stop_criteria.is_stagnation_count() and stagnations >= stop_criteria.get_stagnation_count())):
+        new_population_with_fit = []
+        u = [(i, 1 / population_with_fit[i][1]) for i in range(sz)]
 
-        u.sort(key=functools.cmp_to_key(cmp_by_2nd))
+        u.sort(key=functools.cmp_to_key(cmp_by_2nd_dec))
 
-        [new_population.append(population[u[i][0]]) for i in range(l)]          # elitism
+        [new_population_with_fit.append(population_with_fit[u[i][0]]) for i in range(l)]  # elitism
 
         for _ in range(h):
             i = weighted_random_index(u)
-            new_population.append(mutation(population[i]))                      # mutation
+            mutated = mutation(population_with_fit[i][0])
+            new_population_with_fit.append(with_fit(mutated, fit_function))               # mutation
 
         for _ in range(g // 2):
             i1, i2 = weighted_random_index(u), weighted_random_index(u)
-            new_population.extend(crossover(population[i1], population[i2]))    # crossover
+            crossed_with_fit = [with_fit(crossed, fit_function) for crossed in
+                                crossover(population_with_fit[i1][0], population_with_fit[i2][0])]
+            new_population_with_fit.extend(crossed_with_fit)                              # crossover
 
-        population = new_population
+        iterations += 1
+        best_fit = max(population_with_fit, key=functools.cmp_to_key(cmp_by_2nd_dec))[1]
+        new_best_fit = max(new_population_with_fit, key=functools.cmp_to_key(cmp_by_2nd_dec))[1]
+        if new_best_fit < best_fit:
+            stagnations = 0
+        else:
+            stagnations += 1
 
-    population_with_fit = [(item, fit_function(item)) for item in population]
-    return min(population_with_fit, key=functools.cmp_to_key(cmp_by_2nd))[0]
+        population_with_fit = new_population_with_fit
+
+    best_in_population = max(population_with_fit, key=functools.cmp_to_key(cmp_by_2nd_dec))[0]
+    return best_in_population, {'iterations': iterations}
 
 
 def weighted_random_index(u):
@@ -78,9 +114,15 @@ def weighted_random_index(u):
             r -= u[i][1]
     raise AssertionError('Unreachable state')
 
+
+def with_fit(vec, fit_function):
+    return vec, fit_function(vec)
+
+
 def default_mutation(vec):
     n = len(vec)
     return [1 - vec[i] if random.randrange(n) == 0 else vec[i] for i in range(n)]
+
 
 def two_point_crossover(vec1, vec2):
     n = len(vec1)

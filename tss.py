@@ -1,7 +1,15 @@
 import random
 from copy import copy
+from time import time
 
 import genetic
+
+
+def exec_with_time(executable):
+    time_start = time()
+    result = executable()
+    time_end = time()
+    return result, time_end - time_start
 
 
 class TSSProblem:
@@ -43,26 +51,27 @@ class TSSProblem:
     def solve_abstract(self, solver, seed=None):
         random.seed(seed)
 
-        solution_vec = solver()
+        (solution_vec, metadata), time = exec_with_time(lambda: solver())
         solution = []
         for i in range(len(solution_vec)):
             if solution_vec[i]:
                 solution.append(self.dltm.ord_to_agent[i])
-        return solution
+        metadata['time'] = time
+        return solution, metadata
 
-    def solve_using_1p1(self, iterations, seed=None):
+    def solve_using_1p1(self, stop_criteria, seed=None):
         return self.solve_abstract(lambda: genetic.using_1p1(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, iterations
+            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, stop_criteria
         ), seed)
 
-    def solve_using_1cl(self, lmbd, iterations, seed=None):
+    def solve_using_1cl(self, lmbd, stop_criteria, seed=None):
         return self.solve_abstract(lambda: genetic.using_1cl(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, lmbd, iterations
+            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, lmbd, stop_criteria
         ), seed)
 
-    def solve_using_custom_ga(self, l, h, g, iterations, seed=None):
+    def solve_using_custom_ga(self, l, h, g, stop_criteria, seed=None):
         return self.solve_abstract(lambda: genetic.using_custom_ga(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, iterations
+            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, stop_criteria
         ), seed)
 
 

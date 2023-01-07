@@ -25,17 +25,3 @@ if __name__ == '__main__':
     print(tss_problem.solve_using_1cl(100, 100))
     print(tss_problem.solve_using_1cl(1000, 10))
     print(tss_problem.solve_using_custom_ga(2, 4, 4, 1000))
-
-    # sum_time = 0
-    # for _ in range(iterations):
-    #     t = timeof(lambda: print(tss_problem.solve_using_1p1(10000)))
-    #     sum_time += t
-    #     print('Time (1+1): {}'.format(t))
-    # print('Average: {}\n'.format(sum_time / iterations))
-    #
-    # sum_time = 0
-    # for _ in range(iterations):
-    #     t = timeof(lambda: print(tss_problem.solve_using_1cl(100, 100)))
-    #     sum_time += t
-    #     print('Time (1,lambda): {}'.format(t))
-    # print('Average: {}\n'.format(sum_time / iterations))
