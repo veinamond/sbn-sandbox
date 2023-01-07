@@ -1,3 +1,4 @@
+import tss_stop_criteria
 from dltm import DLTM
 from time import time
 from tss import TSSProblem
@@ -20,8 +21,8 @@ if __name__ == '__main__':
 
     iterations = 10
 
-    print(tss_problem.solve_using_1p1(10000))
-    print(tss_problem.solve_using_1cl(10, 1000))
-    print(tss_problem.solve_using_1cl(100, 100))
-    print(tss_problem.solve_using_1cl(1000, 10))
-    print(tss_problem.solve_using_custom_ga(2, 4, 4, 1000))
+    print(tss_problem.solve_using_1p1(tss_stop_criteria.by_iteration_count(10000)))
+    print(tss_problem.solve_using_1cl(10, tss_stop_criteria.by_iteration_count(1000)))
+    print(tss_problem.solve_using_1cl(100, tss_stop_criteria.by_iteration_count(100)))
+    print(tss_problem.solve_using_1cl(1000, tss_stop_criteria.by_iteration_count(10)))
+    print(tss_problem.solve_using_custom_ga(2, 4, 4, tss_stop_criteria.by_iteration_count(1000)))
