@@ -1,14 +1,6 @@
 import tss_stop_criteria
 from dltm import DLTM
-from time import time
 from tss import TSSProblem
-
-
-def timeof(executable):
-    time_start = time()
-    executable()
-    time_end = time()
-    return time_end - time_start
 
 
 if __name__ == '__main__':
