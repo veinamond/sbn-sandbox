@@ -1,5 +1,6 @@
 import functools
 import random
+from copy import copy
 
 
 def using_1p1(init_vec, fit_function, mutation, stop_criteria):
@@ -29,8 +30,8 @@ def using_1cl(init_vec, fit_function, mutation, lmbd, stop_criteria):
     if lmbd < 1:
         raise ValueError('Lambda parameter in (1,lambda) algorithm must be >= 1')
 
-    cur_vec = init_vec
-    cur_fit = fit_function(cur_vec)
+    cur_vec = copy(init_vec)
+    best_vec = copy(init_vec)
     best_fit = None
     iterations = 0
     stagnations = 0
@@ -47,15 +48,15 @@ def using_1cl(init_vec, fit_function, mutation, lmbd, stop_criteria):
 
         iterations += 1
         if best_fit is None or new_opt_fit < best_fit:
+            best_vec = new_opt_vec
             best_fit = new_opt_fit
             stagnations = 0
         else:
             stagnations += 1
 
         cur_vec = new_opt_vec
-        cur_fit = new_opt_fit
 
-    return cur_vec, {'iterations': iterations}
+    return best_vec, {'iterations': iterations}
 
 
 def using_custom_ga(init_vec, fit_function, mutation, crossover, l, h, g, stop_criteria):
