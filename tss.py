@@ -2,7 +2,11 @@ import random
 from copy import copy
 from time import time
 
+from pysat.pb import EncType
+from pysat.solvers import Glucose3
+
 import genetic
+import tss_sat
 
 
 def exec_with_time(executable):
@@ -73,6 +77,30 @@ class TSSProblem:
         return self.solve_abstract(lambda: genetic.using_custom_ga(
             [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, stop_criteria
         ), seed)
+
+    def solve_using_sat(self, pb_encoding=EncType.seqcounter, sat_solver=lambda cnf: Glucose3(bootstrap_with=cnf)):
+
+        def do_solve():
+            n = len(self.dltm.agents)
+            if self.fit([0] * n) != n + 1:
+                return []
+
+            left = 0
+            right = self.threshold
+            right_solution = None
+            while left + 1 < right:
+                mid = (left + right) // 2
+                mid_solution = tss_sat.solve_tss(self, mid, pb_encoding, sat_solver)
+                if mid_solution:
+                    right = mid
+                    right_solution = mid_solution
+                else:
+                    left = mid
+
+            return right_solution if right_solution else tss_sat.solve_tss(self, right, pb_encoding, sat_solver)
+
+        solution, time = exec_with_time(lambda: do_solve())
+        return solution, {'time': time}
 
 
 def wt(vec):

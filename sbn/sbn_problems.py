@@ -114,7 +114,6 @@ def solve_problem_1(
         Cardinality constraints encoding and solver initializer are optional.
     """
     cnf = build_cnf_for_problem_1(sbn, instigators, need_to_activate, encoding)
-    print(cnf.clauses)
     with solver_init(cnf) as solver:
         if solver.solve():
             cnf_solution = solver.get_model()
