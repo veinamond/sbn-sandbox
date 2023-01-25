@@ -7,6 +7,7 @@ from pysat.solvers import Glucose3
 
 import genetic
 import tss_sat
+import tss_tdg
 
 
 def exec_with_time(executable):
@@ -77,6 +78,10 @@ class TSSProblem:
         return self.solve_abstract(lambda: genetic.using_custom_ga(
             [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, stop_criteria
         ), seed)
+
+    def solve_using_tdg(self, d1, d2):
+        solution, solution_time = exec_with_time(lambda: tss_tdg.solve(self, d1, d2))
+        return solution, {'time': solution_time}
 
     def solve_using_sat(self, pb_encoding=EncType.seqcounter, sat_solver=lambda cnf: Glucose3(bootstrap_with=cnf)):
 

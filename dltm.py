@@ -9,6 +9,7 @@ class DLTM:
     def __init__(self):
         self.agents = {}        # agent_id -> theta
         self.graph = {}         # agent_id_from -> [list of agent_id_to]
+        self.graph_inv = {}     # agent_id_to -> [list of agent_id_from]
         self.infl = {}          # (agent_id_from, agent_id_to) -> influence
 
         self.ord_to_agent = []  # ordinal (number in [0;n) range) -> agent_id
@@ -17,6 +18,7 @@ class DLTM:
     def put_agent(self, agent_id, theta):
         self.agents[agent_id] = theta
         self.graph[agent_id] = []
+        self.graph_inv[agent_id] = []
         self.ord_to_agent.append(agent_id)
         self.agent_to_ord[agent_id] = len(self.ord_to_agent) - 1
 
@@ -27,7 +29,10 @@ class DLTM:
     def add_edge(self, agent_id_from, agent_id_to, influence):
         if not (agent_id_from in self.agents):
             self.put_agent(agent_id_from, 0)
+        if not (agent_id_to in self.agents):
+            self.put_agent(agent_id_to, 0)
         self.graph[agent_id_from].append(agent_id_to)
+        self.graph_inv[agent_id_to].append(agent_id_from)
         self.infl[(agent_id_from, agent_id_to)] = influence
 
     def add_edges(self, edge_trios):

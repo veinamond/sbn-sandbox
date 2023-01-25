@@ -4,8 +4,8 @@ from tss_measurements_data import tss
 if __name__ == '__main__':
     solvers = [
         ('1+1-EA[1000]', lambda problem: problem.solve_using_1p1(tss_stop_criteria.by_stagnation_count(1000))),
-        ('1;l-EA[4;1000]', lambda problem: problem.solve_using_1cl(4, tss_stop_criteria.by_stagnation_count(1000))),
-        ('1;l-EA[20;1000]', lambda problem: problem.solve_using_1cl(20, tss_stop_criteria.by_stagnation_count(1000))),
+        ('1;4-EA[1000]', lambda problem: problem.solve_using_1cl(4, tss_stop_criteria.by_stagnation_count(1000))),
+        ('1;20-EA[1000]', lambda problem: problem.solve_using_1cl(20, tss_stop_criteria.by_stagnation_count(1000))),
         ('customGA[2;4;4;1000]', lambda problem: problem.solve_using_custom_ga(2, 4, 4, tss_stop_criteria.by_stagnation_count(1000))),
         ('customGA[4;2;4;1000]', lambda problem: problem.solve_using_custom_ga(4, 2, 4, tss_stop_criteria.by_stagnation_count(1000))),
         ('customGA[4;4;2;1000]', lambda problem: problem.solve_using_custom_ga(4, 4, 2, tss_stop_criteria.by_stagnation_count(1000)))

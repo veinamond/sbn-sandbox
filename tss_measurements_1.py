@@ -5,8 +5,8 @@ from tss_measurements_data import tss
 if __name__ == '__main__':
     solvers = [
         ('1+1-EA[2000]', lambda problem: problem.solve_using_1p1(tss_stop_criteria.by_iteration_count(2000))),
-        ('1;l-EA[4;500]', lambda problem: problem.solve_using_1cl(4, tss_stop_criteria.by_iteration_count(500))),
-        ('1;l-EA[20;100]', lambda problem: problem.solve_using_1cl(20, tss_stop_criteria.by_iteration_count(100))),
+        ('1;4-EA[500]', lambda problem: problem.solve_using_1cl(4, tss_stop_criteria.by_iteration_count(500))),
+        ('1;20-EA[100]', lambda problem: problem.solve_using_1cl(20, tss_stop_criteria.by_iteration_count(100))),
         ('customGA[2;4;4;200]', lambda problem: problem.solve_using_custom_ga(2, 4, 4, tss_stop_criteria.by_iteration_count(200))),
         ('customGA[4;2;4;200]', lambda problem: problem.solve_using_custom_ga(4, 2, 4, tss_stop_criteria.by_iteration_count(200))),
         ('customGA[4;4;2;200]', lambda problem: problem.solve_using_custom_ga(4, 4, 2, tss_stop_criteria.by_iteration_count(200))),
