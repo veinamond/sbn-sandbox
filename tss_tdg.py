@@ -20,7 +20,7 @@ def solve(tss, d1, d2):
                 best_agent_infl = agent_infl
         s.add(best_agent_id)
         r.add(best_agent_id)
-        update_for_new_seed(tss.dltm, best_agent_id, threshold, r, infl, d1, d2)
+        update_for_new_seed(tss.dltm, best_agent_id, threshold, r, d1, d2)
 
     return list(s)
 
@@ -49,7 +49,7 @@ def compute_influence(dltm, agent_id, threshold, r, d1):
     return new_infl
 
 
-def update_for_new_seed(dltm, agent_id, threshold, r, infl, d1, d2):
+def update_for_new_seed(dltm, agent_id, threshold, r, d1, d2):
     queue = deque()
     queue.append((agent_id, 0))
     visited = set()
@@ -68,10 +68,10 @@ def update_for_new_seed(dltm, agent_id, threshold, r, infl, d1, d2):
                     queue.append((w, lvl + 1))
             else:
                 threshold[w] -= dltm.infl[(u, w)]
-            update_incoming_neighbour_influence(dltm, w, threshold, r, infl, d1)
+            update_incoming_neighbour_influence(dltm, w, threshold, r, d1)
 
 
-def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, infl, d1):
+def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, d1):
     queue = deque()
     queue.append((agent_id, 0))
     visited = set()
@@ -84,5 +84,6 @@ def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, infl, d1):
 
             compute_influence(dltm, w, threshold, r, d1)
             if (w, u) in dltm.infl and dltm.infl[(w, u)] >= threshold[w]:
+                visited.add(w)
                 if lvl < d1:
                     queue.append((w, lvl + 1))
