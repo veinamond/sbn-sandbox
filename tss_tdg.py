@@ -54,6 +54,9 @@ def update_for_new_seed(dltm, agent_id, threshold, r, d1, d2):
     queue.append((agent_id, 0))
     visited = set()
     visited.add(agent_id)
+
+    uini_set = set()
+    ci_set = set()
     while queue:
         u, lvl = queue.popleft()
         for w in dltm.graph[u]:
@@ -68,10 +71,15 @@ def update_for_new_seed(dltm, agent_id, threshold, r, d1, d2):
                     queue.append((w, lvl + 1))
             else:
                 threshold[w] -= dltm.infl[(u, w)]
-            update_incoming_neighbour_influence(dltm, w, threshold, r, d1)
+            uini_set.add(w)
+
+    for w in uini_set:
+        update_incoming_neighbour_influence(dltm, w, threshold, r, d1, ci_set)
+    for ww in ci_set:
+        compute_influence(dltm, ww, threshold, r, d1)
 
 
-def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, d1):
+def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, d1, ci_set):
     queue = deque()
     queue.append((agent_id, 0))
     visited = set()
@@ -82,7 +90,7 @@ def update_incoming_neighbour_influence(dltm, agent_id, threshold, r, d1):
             if w in r or w in visited:
                 continue
 
-            compute_influence(dltm, w, threshold, r, d1)
+            ci_set.add(w)
             if (w, u) in dltm.infl and dltm.infl[(w, u)] >= threshold[w]:
                 visited.add(w)
                 if lvl < d1:
