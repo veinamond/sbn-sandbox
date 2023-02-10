@@ -40,6 +40,7 @@ def compute_influence(dltm, agent_id, threshold, r, d1):
 
             if dltm.infl[(u, w)] >= threshold_tmp[w]:
                 new_infl += 1
+                threshold_tmp[w] = 0
                 if lvl < d1:
                     queue.append((w, lvl + 1))
                 visited.add(w)

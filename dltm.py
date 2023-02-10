@@ -17,10 +17,13 @@ class DLTM:
 
     def put_agent(self, agent_id, theta):
         self.agents[agent_id] = theta
-        self.graph[agent_id] = []
-        self.graph_inv[agent_id] = []
-        self.ord_to_agent.append(agent_id)
-        self.agent_to_ord[agent_id] = len(self.ord_to_agent) - 1
+        if agent_id not in self.graph:
+            self.graph[agent_id] = []
+        if agent_id not in self.graph_inv:
+            self.graph_inv[agent_id] = []
+        if agent_id not in self.agent_to_ord:
+            self.ord_to_agent.append(agent_id)
+            self.agent_to_ord[agent_id] = len(self.ord_to_agent) - 1
 
     def put_agents(self, agent_pairs):
         for agent_id, theta in agent_pairs:
@@ -39,9 +42,15 @@ class DLTM:
         for agent_id_from, agent_id_to, influence in edge_trios:
             self.add_edge(agent_id_from, agent_id_to, influence)
 
+    def nodes_count(self):
+        return len(self.agents)
+
+    def edges_count(self):
+        return len(self.infl)
+
     # Random DLTM generation
 
-    # 1. Graph generation
+    # 1.1. Graph generation
 
     def generate_gnp_random_graph(self, n, p, seed=None):
         graph = gnp_random_graph(n, p, seed=seed, directed=True)
@@ -68,6 +77,22 @@ class DLTM:
         [self.add_edge(a_from, a_to, 0) for a_from, a_to in graph.edges]
         [self.add_edge(a_to, a_from, 0) for a_from, a_to in graph.edges]
         return self
+
+    # 1.2. Graph from IO
+
+    def read_graph_as_edge_list(self, path, directed=False):
+        with open(path) as f:
+            for line in f.readlines():
+                line_args = line.split()
+                if len(line_args) == 1:
+                    raise ValueError('Expected at least 2 values, got only one: {}'.format(line))
+                self.put_agent(line_args[0], 0)
+                self.put_agent(line_args[1], 0)
+                self.add_edge(line_args[0], line_args[1], 0)
+                if not directed:
+                    self.add_edge(line_args[1], line_args[0], 0)
+
+            return self
 
     # 2. Influence generation
 

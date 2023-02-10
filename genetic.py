@@ -68,7 +68,7 @@ def using_custom_ga(init_vec, fit_function, mutation, crossover, l, h, g, stop_c
     def cmp_by_2nd_dec(idx1, idx2):
         return 0 if idx1[1] == idx2[1] else (1 if idx1[1] < idx2[1] else -1)
 
-    sz = l + h + g      # population size
+    sz = l + h + g  # population size
     population_with_fit = [with_fit(item, fit_function) for item in [init_vec] * sz]
     iterations = 0
     stagnations = 0
@@ -84,13 +84,13 @@ def using_custom_ga(init_vec, fit_function, mutation, crossover, l, h, g, stop_c
         for _ in range(h):
             i = weighted_random_index(u)
             mutated = mutation(population_with_fit[i][0])
-            new_population_with_fit.append(with_fit(mutated, fit_function))               # mutation
+            new_population_with_fit.append(with_fit(mutated, fit_function))  # mutation
 
         for _ in range(g // 2):
             i1, i2 = weighted_random_index(u), weighted_random_index(u)
             crossed_with_fit = [with_fit(crossed, fit_function) for crossed in
                                 crossover(population_with_fit[i1][0], population_with_fit[i2][0])]
-            new_population_with_fit.extend(crossed_with_fit)                              # crossover
+            new_population_with_fit.extend(crossed_with_fit)  # crossover
 
         iterations += 1
         best_fit = max(population_with_fit, key=functools.cmp_to_key(cmp_by_2nd_dec))[1]
@@ -120,9 +120,53 @@ def with_fit(vec, fit_function):
     return vec, fit_function(vec)
 
 
-def default_mutation(vec):
+def non_increasing_mutation_of(base_mutation, vec, env):
+    vec_wt = sum(vec)
+    new_vec = None
+    new_vec_wt = None
+    while new_vec_wt is None or new_vec_wt > vec_wt:
+        new_vec = base_mutation(vec, env)
+        new_vec_wt = sum(new_vec)
+    return new_vec
+
+
+def default_mutation(vec, env):
     n = len(vec)
     return [1 - vec[i] if random.randrange(n) == 0 else vec[i] for i in range(n)]
+
+
+def non_increasing_default_mutation(vec):
+    return non_increasing_mutation_of(default_mutation, vec, None)
+
+
+def init_doerr_env(beta, ndiv2):
+    env = []
+    for i in range(ndiv2):
+        env.append((i + 1) ** -beta)
+    for i in range(ndiv2 - 1):
+        env[i + 1] += env[i]
+    last = env[len(env) - 1]
+    for i in range(ndiv2):
+        env[i] /= last
+    return env
+
+
+def generate_alpha_for_doerr_mutation(env):
+    x = random.random()
+    for i in range(len(env)):
+        if x <= env[i]:
+            return i + 1
+    raise AssertionError('Unreachable state')
+
+
+def doerr_mutation(vec, env):
+    n = len(vec)
+    alpha = generate_alpha_for_doerr_mutation(env)
+    return [1 - vec[i] if random.random() < alpha / n else vec[i] for i in range(n)]
+
+
+def non_increasing_doerr_mutation(vec, env):
+    return non_increasing_mutation_of(doerr_mutation, vec, env)
 
 
 def two_point_crossover(vec1, vec2):

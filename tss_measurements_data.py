@@ -1,9 +1,11 @@
+from math import ceil
+
 from dltm import DLTM
 from tss import TSSProblem
 
 seed = 123
 
-data = [
+small_data = [
     ('ws[30;4;0.2];0.4', DLTM()
      .generate_watts_strogatz_graph(30, 4, 0.2, seed)
      .generate_constant_influences(1)
@@ -73,4 +75,33 @@ data = [
      .generate_proportional_thresholds(0.7)),
 ]
 
-tss = [(data[i][0], TSSProblem(data[i][1], 100 if i // 4 % 2 else 30)) for i in range(len(data))]
+fb_data = [
+    # ('fb_1_0.2', DLTM()
+    #  .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+    #  .generate_constant_influences(1)
+    #  .generate_proportional_thresholds(0.2)),
+    # ('fb_1_0.5', DLTM()
+    #  .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+    #  .generate_constant_influences(1)
+    #  .generate_proportional_thresholds(0.5)),
+    ('fb_1_0.8', DLTM()
+     .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+     .generate_constant_influences(1)
+     .generate_proportional_thresholds(0.8)),
+    ('fb_[1;5]_0.2', DLTM()
+     .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+     .generate_range_influences(1, 5, seed=123)
+     .generate_proportional_thresholds(0.2)),
+    ('fb_[1;5]_0.5', DLTM()
+     .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+     .generate_range_influences(1, 5, seed=123)
+     .generate_proportional_thresholds(0.5)),
+    ('fb_[1;5]_0.8', DLTM()
+     .read_graph_as_edge_list('samples/facebook_combined.txt', False)
+     .generate_range_influences(1, 5, seed=123)
+     .generate_proportional_thresholds(0.8)),
+]
+
+small_data_tss = [(small_data[i][0], TSSProblem(small_data[i][1], small_data[i][1].nodes_count())) for i in range(len(small_data))]
+
+fb_data_tss = [(fb_data[i][0], TSSProblem(fb_data[i][1], ceil(fb_data[i][1].nodes_count() * 0.75))) for i in range(len(fb_data))]

@@ -1,4 +1,4 @@
-from tss_measurements_data import tss
+from tss_measurements_data import small_data_tss
 
 if __name__ == '__main__':
     solvers = [
@@ -10,7 +10,7 @@ if __name__ == '__main__':
         [f.write(',{}'.format(solvers[i][0])) for i in range(len(solvers))]
         f.write('\n')
 
-        for tss_name, tss_instance in tss:
+        for tss_name, tss_instance in small_data_tss:
             if tss_name.__contains__('[100'):
                 continue
             f.write(tss_name)

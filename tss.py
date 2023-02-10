@@ -23,10 +23,16 @@ class TSSProblem:
         self.dltm = dltm
         self.threshold = threshold
 
+    def nodes_count(self):
+        return self.dltm.nodes_count()
+
+    def edges_count(self):
+        return self.dltm.edges_count()
+
     def fit(self, vec):
         n = len(vec)
-        if n != len(self.dltm.ord_to_agent):
-            raise ValueError('vector length ({}) != agents number ({})'.format(n, len(self.dltm.ord_to_agent)))
+        if n != self.nodes_count():
+            raise ValueError('vector length ({}) != agents number ({})'.format(n, self.nodes_count()))
 
         start_vec = [1 if a else 0 for a in vec]
         cur_vec = copy(start_vec)
@@ -55,38 +61,55 @@ class TSSProblem:
 
     def solve_abstract(self, solver, seed=None):
         random.seed(seed)
-
         (solution_vec, metadata), time = exec_with_time(lambda: solver())
-        solution = []
-        for i in range(len(solution_vec)):
-            if solution_vec[i]:
-                solution.append(self.dltm.ord_to_agent[i])
+        solution = vec_to_agents(self, solution_vec)
         metadata['time'] = time
         return solution, metadata
 
-    def solve_using_1p1(self, stop_criteria, seed=None):
+    def solve_using_1p1(self, stop_criteria, mutation=genetic.non_increasing_default_mutation, seed=None):
         return self.solve_abstract(lambda: genetic.using_1p1(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, stop_criteria
+            [1] * self.nodes_count(), self.fit, mutation, stop_criteria
         ), seed)
 
     def solve_using_1cl(self, lmbd, stop_criteria, seed=None):
         return self.solve_abstract(lambda: genetic.using_1cl(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, lmbd, stop_criteria
+            [1] * self.nodes_count(), self.fit, genetic.default_mutation, lmbd, stop_criteria
         ), seed)
 
     def solve_using_custom_ga(self, l, h, g, stop_criteria, seed=None):
         return self.solve_abstract(lambda: genetic.using_custom_ga(
-            [1] * len(self.dltm.agents), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, stop_criteria
+            [1] * self.nodes_count(), self.fit, genetic.default_mutation, genetic.two_point_crossover, l, h, g, stop_criteria
         ), seed)
 
     def solve_using_tdg(self, d1, d2):
         solution, solution_time = exec_with_time(lambda: tss_tdg.solve(self, d1, d2))
         return solution, {'time': solution_time}
 
+    def solve_using_tdg_and_then_1p1(self, d1, d2, stop_criteria, seed=None):
+        tdg_solution, tdg_solution_time = exec_with_time(lambda: tss_tdg.solve(self, d1, d2))
+        solution, metadata = self.solve_abstract(lambda: genetic.using_1p1(
+            agents_to_vec(self, tdg_solution), self.fit,
+            genetic.non_increasing_default_mutation,
+            stop_criteria
+        ), seed)
+        metadata['time'] = metadata['time'] + tdg_solution_time
+        return solution, metadata
+
+    def solve_using_tdg_and_then_doerr_1p1(self, d1, d2, beta, stop_criteria, seed=None):
+        env = genetic.init_doerr_env(beta, self.nodes_count() // 2)
+        tdg_solution, tdg_solution_time = exec_with_time(lambda: tss_tdg.solve(self, d1, d2))
+        solution, metadata = self.solve_abstract(lambda: genetic.using_1p1(
+            agents_to_vec(self, tdg_solution), self.fit,
+            lambda vec: genetic.non_increasing_doerr_mutation(vec, env),
+            stop_criteria
+        ), seed)
+        metadata['time'] = metadata['time'] + tdg_solution_time
+        return solution, metadata
+
     def solve_using_sat(self, pb_encoding=EncType.seqcounter, sat_solver=lambda cnf: Glucose3(bootstrap_with=cnf)):
 
         def do_solve():
-            n = len(self.dltm.agents)
+            n = self.nodes_count()
             if self.fit([0] * n) != n + 1:
                 return []
 
@@ -110,3 +133,18 @@ class TSSProblem:
 
 def wt(vec):
     return sum(vec)
+
+
+def vec_to_agents(tss, vec):
+    agents = []
+    for i in range(tss.nodes_count()):
+        if vec[i]:
+            agents.append(tss.dltm.ord_to_agent[i])
+    return agents
+
+
+def agents_to_vec(tss, agents):
+    vec = [0] * tss.nodes_count()
+    for agent in agents:
+        vec[tss.dltm.agent_to_ord[agent]] = 1
+    return vec

@@ -29,7 +29,7 @@ def __atleast_equals(lits, weights, eq_lit, first_lit, bound, vpool=IDPool(), en
 
 def build_cnf(tss, instigators, pb_encoding=EncType.seqcounter):
     dltm = tss.dltm
-    n = len(dltm.agents)
+    n = dltm.nodes_count()
     need_to_activate = tss.threshold - instigators
 
     if instigators < 0 or instigators > n:
@@ -85,7 +85,7 @@ def extract_solution(dltm, cnf_solution):
     """
         Extracts instigators disposition from a CNF solution of Problem 1 instance.
     """
-    sliced_vars = cnf_solution[:len(dltm.agents)]
+    sliced_vars = cnf_solution[:dltm.nodes_count()]
     true_vars = list(filter(lambda cnf_var: cnf_var > 0, sliced_vars))
     return [dltm.ord_to_agent[i - 1] for i in true_vars]
 

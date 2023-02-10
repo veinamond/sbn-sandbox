@@ -1,5 +1,5 @@
 import tss_stop_criteria
-from tss_measurements_data import tss
+from tss_measurements_data import small_data_tss
 
 
 if __name__ == '__main__':
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         [f.write(',{}'.format(solvers[i][0])) for i in range(len(solvers))]
         f.write('\n')
 
-        for tss_name, tss_instance in tss:
+        for tss_name, tss_instance in small_data_tss:
             f.write(tss_name)
 
             for solver_name, solver in solvers:
