@@ -130,7 +130,7 @@ def non_increasing_mutation_of(base_mutation, vec, env):
     return new_vec
 
 
-def default_mutation(vec, env):
+def default_mutation(vec, env=[]):
     n = len(vec)
     return [1 - vec[i] if random.randrange(n) == 0 else vec[i] for i in range(n)]
 
